@@ -11,9 +11,6 @@ import os
 from pprint import pprint
 
 
-NA = 'NA'
-
-
 def get_data_path(path):
     return os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'data', path)
@@ -30,7 +27,7 @@ def open_file(path):
 def parse_line(fields, line):
     parsed = {}
     for (name, start, end, parser) in fields:
-        value = NA
+        value = None
         field = line[start - 1:end].strip()
         if field:
             try:
@@ -39,7 +36,6 @@ def parse_line(fields, line):
                 raise ValueError("Could not parse field %r: %r" % (name, field))
         parsed[name] = value
     return parsed
-
 
 
 OUTCOME_LABELS = {
@@ -75,22 +71,26 @@ def load_records(path, fields):
             yield parse_line(fields, line)
 
 
+def get_birthweight(record):
+    lb = record['birthwgt_lb']
+    oz = record['birthwgt_oz']
+    if lb and lb < 20 and oz and oz <= 16:
+        return lb * 16 + oz
+
+
 def recode(rec):
     # divide mother's age by 100
-    if rec['agepreg'] != NA:
+    if rec['agepreg']:
         rec['agepreg'] /= 100.0
     # convert weight at birth from lbs/oz to total ounces
     # note: there are some very low birthweights
     # that are almost certainly errors, but for now I am not
     # filtering
-    if (rec['birthwgt_lb'] != NA and rec['birthwgt_lb'] < 20 and
-        rec['birthwgt_oz'] != NA and rec.birthwgt_oz <= 16):
-        rec['totalwgt_oz'] = rec['birthwgt_lb'] * 16 + rec['birthwgt_oz']
-    else:
-        rec['totalwgt_oz'] = NA
+    rec['totalwgt_oz'] = get_birthweight(rec)
+    return rec
 
 
 if __name__ == '__main__':
     pregs = load_records(**PREGNANCIES)
     for preg in pregs:
-        pprint(preg)
+        pprint(recode(preg))
