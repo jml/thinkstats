@@ -7,7 +7,8 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 import bisect
 
-def Mean(t):
+
+def mean(t):
     """Computes the mean of a sequence of numbers.
 
     Args:
@@ -19,7 +20,7 @@ def Mean(t):
     return float(sum(t)) / len(t)
 
 
-def MeanVar(t):
+def mean_variance(t):
     """Computes the mean and variance of a sequence of numbers.
 
     Args:
@@ -28,12 +29,12 @@ def MeanVar(t):
     Returns:
         tuple of two floats
     """
-    mu = Mean(t)
-    var = Var(t, mu)
+    mu = mean(t)
+    var = variance(t, mu)
     return mu, var
 
 
-def Trim(t, p=0.01):
+def trim(t, p=0.01):
     """Trims the largest and smallest elements of t.
 
     Args:
@@ -43,13 +44,11 @@ def Trim(t, p=0.01):
     Returns:
         sequence of values
     """
-    t.sort()
     n = int(p * len(t))
-    t = t[n:-n]
-    return t
+    return sorted(t)[n:-n]
 
 
-def TrimmedMean(t, p=0.01):
+def trimmed_mean(t, p=0.01):
     """Computes the trimmed mean of a sequence of numbers.
 
     Side effect: sorts the list.
@@ -61,11 +60,10 @@ def TrimmedMean(t, p=0.01):
     Returns:
         float
     """
-    t = Trim(t, p)
-    return Mean(t)
+    return mean(trim(t, p))
 
 
-def TrimmedMeanVar(t, p=0.01):
+def trimmed_mean_variance(t, p=0.01):
     """Computes the trimmed mean and variance of a sequence of numbers.
 
     Side effect: sorts the list.
@@ -77,12 +75,10 @@ def TrimmedMeanVar(t, p=0.01):
     Returns:
         float
     """
-    t = Trim(t, p)
-    mu, var = MeanVar(t)
-    return mu, var
+    return mean_variance(trim(t, p))
 
 
-def Var(t, mu=None):
+def variance(t, mu=None):
     """Computes the variance of a sequence of numbers.
 
     Args:
@@ -94,15 +90,14 @@ def Var(t, mu=None):
         float
     """
     if mu is None:
-        mu = Mean(t)
+        mu = mean(t)
 
     # compute the squared deviations and return their mean.
     dev2 = [(x - mu)**2 for x in t]
-    var = Mean(dev2)
-    return var
+    return mean(dev2)
 
 
-def Binom(n, k, d={}):
+def binomial(n, k, d={}):
     """Compute the binomial coefficient "n choose k".
 
     Args:
@@ -121,7 +116,7 @@ def Binom(n, k, d={}):
     try:
         return d[n, k]
     except KeyError:
-        res = Binom(n-1, k) + Binom(n-1, k-1)
+        res = binomial(n-1, k) + binomial(n-1, k-1)
         d[n, k] = res
         return res
 
@@ -137,15 +132,15 @@ class Interpolator(object):
         self.xs = xs
         self.ys = ys
 
-    def Lookup(self, x):
+    def lookup(self, x):
         """Looks up x and returns the corresponding value of y."""
-        return self._Bisect(x, self.xs, self.ys)
+        return self._bisect(x, self.xs, self.ys)
 
-    def Reverse(self, y):
+    def reverse(self, y):
         """Looks up y and returns the corresponding value of x."""
-        return self._Bisect(y, self.ys, self.xs)
+        return self._bisect(y, self.ys, self.xs)
 
-    def _Bisect(self, x, xs, ys):
+    def _bisect(self, x, xs, ys):
         """Helper function."""
         if x <= xs[0]:
             return ys[0]
