@@ -17,6 +17,8 @@ def mean(t):
     Returns:
         float
     """
+    if not t:
+        return
     return float(sum(t)) / len(t)
 
 
@@ -30,6 +32,8 @@ def mean_variance(t):
         tuple of two floats
     """
     mu = mean(t)
+    if not mu:
+        return None, None
     var = variance(t, mu)
     return mu, var
 
@@ -150,5 +154,3 @@ class Interpolator(object):
         frac = 1.0 * (x - xs[i-1]) / (xs[i] - xs[i-1])
         y = ys[i-1] + frac * 1.0 * (ys[i] - ys[i-1])
         return y
-
-
