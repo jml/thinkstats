@@ -8,6 +8,14 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 import bisect
 
 
+def counts(xs):
+    c = {}
+    for x in xs:
+        c.setdefault(x, 0)
+        c[x] += 1
+    return c
+
+
 def mean(t):
     """Computes the mean of a sequence of numbers.
 

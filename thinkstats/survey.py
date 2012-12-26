@@ -10,6 +10,8 @@ import os
 
 from pprint import pprint
 
+from thinkstats.funky import identity
+
 
 def get_data_path(path):
     return os.path.join(
@@ -48,6 +50,18 @@ OUTCOME_LABELS = {
     }
 
 
+def recode(rec):
+    # divide mother's age by 100
+    if rec['agepreg']:
+        rec['agepreg'] /= 100.0
+    # convert weight at birth from lbs/oz to total ounces
+    # note: there are some very low birthweights
+    # that are almost certainly errors, but for now I am not
+    # filtering
+    rec['totalwgt_oz'] = get_birthweight(rec)
+    return rec
+
+
 PREGNANCIES = {
     'path': '2002FemPreg.dat.gz',
     'fields': [
@@ -62,18 +76,18 @@ PREGNANCIES = {
         ('agepreg', 284, 287, int),
         ('finalwgt', 423, 440, float),
         ],
+    'recoder': recode,
     }
 
 
-def load_records(path, fields):
+def load_records(path, fields, recoder=identity):
     with open_file(get_data_path(path)) as f:
         for line in f:
-            yield parse_line(fields, line)
+            yield recoder(parse_line(fields, line))
 
 
-def select(records, *columns):
-    for record in records:
-        yield [record[col] for col in columns]
+def select(records, column):
+    return (record[column] for record in records)
 
 
 def get_birthweight(record):
@@ -81,18 +95,6 @@ def get_birthweight(record):
     oz = record['birthwgt_oz']
     if lb and lb < 20 and oz and oz <= 16:
         return lb * 16 + oz
-
-
-def recode(rec):
-    # divide mother's age by 100
-    if rec['agepreg']:
-        rec['agepreg'] /= 100.0
-    # convert weight at birth from lbs/oz to total ounces
-    # note: there are some very low birthweights
-    # that are almost certainly errors, but for now I am not
-    # filtering
-    rec['totalwgt_oz'] = get_birthweight(rec)
-    return rec
 
 
 if __name__ == '__main__':
