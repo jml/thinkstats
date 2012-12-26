@@ -71,6 +71,11 @@ def load_records(path, fields):
             yield parse_line(fields, line)
 
 
+def select(records, *columns):
+    for record in records:
+        yield [record[col] for col in columns]
+
+
 def get_birthweight(record):
     lb = record['birthwgt_lb']
     oz = record['birthwgt_oz']
