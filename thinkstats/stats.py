@@ -6,6 +6,7 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 import bisect
+from math import sqrt
 
 
 def counts(xs):
@@ -13,6 +14,14 @@ def counts(xs):
     for x in xs:
         c.setdefault(x, 0)
         c[x] += 1
+    return c
+
+
+def pmf(xs):
+    num = float(len(xs))
+    c = counts(xs)
+    for k, v in c:
+        c[k] = v / num
     return c
 
 
@@ -107,6 +116,13 @@ def variance(t, mu=None):
     # compute the squared deviations and return their mean.
     dev2 = [(x - mu)**2 for x in t]
     return mean(dev2)
+
+
+def standard_deviation(t, mu=None):
+    return sqrt(variance(t, mu))
+
+
+std_dev = standard_deviation
 
 
 def binomial(n, k, d={}):
