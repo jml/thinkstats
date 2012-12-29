@@ -5,39 +5,10 @@ Copyright 2010 Allen B. Downey
 License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
-import gzip
-import os
 
 from pprint import pprint
 
 from thinkstats.funky import identity
-
-
-def get_data_path(path):
-    return os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), 'data', path)
-
-
-def open_file(path):
-    """Open file at 'path', decompressing if needed."""
-    if path.endswith('.gz'):
-        return gzip.open(path)
-    else:
-        return open(path)
-
-
-def parse_line(fields, line):
-    parsed = {}
-    for (name, start, end, parser) in fields:
-        value = None
-        field = line[start - 1:end].strip()
-        if field:
-            try:
-                value = parser(field)
-            except ValueError:
-                raise ValueError("Could not parse field %r: %r" % (name, field))
-        parsed[name] = value
-    return parsed
 
 
 OUTCOME_LABELS = {
@@ -80,12 +51,6 @@ PREGNANCIES = {
     }
 
 
-def load_records(path, fields, recoder=identity):
-    with open_file(get_data_path(path)) as f:
-        for line in f:
-            yield recoder(parse_line(fields, line))
-
-
 def select(records, column):
     return (record[column] for record in records)
 
@@ -95,9 +60,3 @@ def get_birthweight(record):
     oz = record['birthwgt_oz']
     if lb and lb < 20 and oz and oz <= 16:
         return lb * 16 + oz
-
-
-if __name__ == '__main__':
-    pregs = load_records(**PREGNANCIES)
-    for preg in pregs:
-        pprint(recode(preg))
